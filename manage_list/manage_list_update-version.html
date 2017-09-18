@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>管理列表-版本号更新</title>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <style>
+        body{
+            background-color: #EDEDEF;
+        }
+        form#add-form{
+            /*border:2px solid #ccc;*/
+            margin:10px 0;
+            padding:10px;
+            border-radius:3px;
+            /*background-color: #ededef;*/
+        }
+        form#add-form div.btn-box{
+            text-align: center;
+        }
+        form#add-form div.btn-box .btn{
+            display:inline-block;
+            padding-left:25px;
+            padding-right:25px;
+        }
+
+        .table {
+            /*border:1px solid #646464;*/
+            width:100%;
+        }
+        table.table tr th{
+            text-align: center;
+            border-bottom:1px solid #dddddd !important;
+            background:#F2F2F2;
+            padding-top:5px;
+            padding-bottom:5px;
+        }
+        table.table tr td{
+            /*border:1px solid #646464;*/
+            padding-top:5px;
+            padding-bottom:5px;
+            text-align: center;
+            border-top:none;
+        }
+        .info-hid {
+            visibility:hidden;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <iframe src="../common/header.html" width="100%" height="70" frameborder="0" scrolling="no"></iframe>
+    <!-- 页面导航 -->
+    <div class="container" style="background:#fff;margin-top:2px;margin-bottom:5px" >
+        <p class="text-primary" style="padding-top:10px">
+            <!-- <a href="../index.html" >首页</a> &gt; -->
+            <a href="./manage_list.html" >管理表</a> &gt;
+            <a href="javascript:;" >版本号更新</a>
+        </p>
+    </div>
+    <!-- 页面内容 -->
+    <div class="container" style="background:#fff;padding:10px">
+        <form class="form-horizontal" id="update-form">
+              <div class="form-group">
+                <label for="sys" class="col-sm-2 control-label"><span style="padding-right:2em">系</span>统:</label>
+                <i></i>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" name="operaSys" disabled id="sys">
+                </div>
+                <div class="col-sm-1"></div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">旧版本号:</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" name="version" disabled>
+                </div>
+                <div class="col-sm-1"></div>
+              </div>
+              <div class="form-group">
+                <label for="inputVeresion" class="col-sm-2 control-label">新版本号:</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="inputVeresion" name="newVersion">
+                  <p class="info-input info-hid" style="color:red;margin:0">请勿输入字母 数字 _ - . 以外的字符！</p>
+                </div>
+                <div class="col-sm-1"></div>
+              </div>
+              <div class="btn-box" style="text-align:center">
+                <button class="btn btn-default cancel-btn" style="padding:5px 25px;margin-right:1em">
+                    取 &nbsp;&nbsp; 消
+                </button>
+                <button type="submit" class="btn btn-success" id="save-btn" style="padding:5px 25px">
+                    保 &nbsp;&nbsp; 存
+                </button>
+              </div>
+        </form>
+    </div>
+    
+    <script src="../lib/template.js"></script>
+    <script src="../lib/js/jquery-1.12.2.min.js"></script>
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <script src="../common/path_config.js"></script>
+    <script src="../common/alert.js"></script>
+    <script>
+        // 处理前页面传来的参数,生成到页面
+        var info = window.location.search.split("=");
+        var operaSys = info[0].slice(1);
+        var version = info[1];
+        $("#update-form input[name=version]").val(version);
+        $("#update-form input[name=operaSys]").val(operaSys);
+        //点击事件 发送request修改
+        $("#save-btn").on("click",function(){
+            var val = $("#update-form input[name=newVersion]").val();
+              //过滤非法字符
+            if(!/[\d\w._-]/g.test(val)){
+                $(".info-input").removeClass("info-hid");
+                return false;
+            }else{
+                //获取上传数据
+                var send_data = {
+                    operaSys:operaSys,
+                    version:version,
+                    newVersion:$("#update-form input[name=newVersion]").val().replace(/\s/g,"")
+                }
+                console.log(send_data);
+                $.ajax({
+                    type: 'POST',
+                    url: api.update_v,
+                    dataType: "json",
+                    contentType: "text/plain",
+                    data:  JSON.stringify(send_data),
+                    success: function(d){
+                        if(d.code==0){
+                            alert("修改成功",function(){
+                                window.history.back();
+                            });
+                        }
+                    },
+                    complete: function (xhr, textStatus) {
+                    if(xhr.status == 403){
+                        alert("请登录后操作",function(){
+                            window.location.href = "../login/login.html";
+                        });
+                    }
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true,
+                });
+                return false;
+            }
+        });
+
+        $(document).on("click",".cancel-btn",function(){
+            window.history.back();
+        });
+        $("#update-form input[name=newVersion]").on("focus",function(){
+            $(".info-input").addClass("info-hid");            
+        });
+        
+    </script>
+</body>
+
+</html>

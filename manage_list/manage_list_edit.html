@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>管理列表-编辑</title>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <style>
+        body{
+            background-color: #EDEDEF;
+        }
+        form#add-form{
+            /*border:2px solid #ccc;*/
+            margin:10px 0;
+            padding:10px;
+            border-radius:3px;
+            /*background-color: #ededef;*/
+        }
+        form#add-form div.btn-box{
+            text-align: center;
+        }
+        form#add-form div.btn-box .btn{
+            display:inline-block;
+            padding-left:25px;
+            padding-right:25px;
+        }
+
+        .table {
+            /*border:1px solid #646464;*/
+            width:100%;
+        }
+        table.table tr th{
+            text-align: center;
+            border-bottom:1px solid #dddddd !important;
+            background:#F2F2F2;
+            padding-top:5px;
+            padding-bottom:5px;
+        }
+        table.table tr td{
+            /*border:1px solid #646464;*/
+            padding-top:5px;
+            padding-bottom:5px;
+            text-align: center;
+            border-top:none;
+        }
+        #input-box td input{
+            padding-left:5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <iframe src="../common/header.html" width="100%" height="70" frameborder="0" scrolling="no"></iframe>
+    <!-- 页面导航 -->
+    <div class="container" style="background:#fff;margin-top:2px;margin-bottom:5px" >
+        <p class="text-primary" style="padding-top:10px">
+            <!-- <a href="../index.html" >首页</a> &gt; -->
+            <a href="./manage_list.html" >管理表</a> &gt;
+            <a href="javascript:;" class="get-back">查看详情</a> &gt;
+            <a href="javascript:;" >编辑url</a>
+        </p>
+    </div>
+    <!-- 页面内容 -->
+    <div class="container" style="background:#fff;padding:10px">
+        <form class="form-horizontal" id="add-form">
+              <table class="table" >
+                <tr>
+                    <th>url名字</th>
+                    <th>url</th>
+                    <th>是否启用</th>
+                    <th>备注</th>
+                    <th></th>
+                </tr>              
+                <tr id="input-box">
+                    <td style="width:15%"><input type="text" name="urlName" value="" style="width:100%"></td>
+                    <td style="width:50%"><input type="text" name="url" value="" style="width:100%"></td>
+                    <td style="width:12%">
+                        <select name="isopen" id="" style="height:26px;padding:0 15px">
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>       
+                    </td>                             
+                    <td style="width:20%;"><input type="text" name="remark" style="width:100%" value=""></td>
+                    <!-- 暂存前页面传来的id -->
+                    <td style="display:none"><input type="text" name="id"></td> 
+                </tr>
+
+              </table>
+              <div class="btn-box">
+                <button id="cancel-btn" class="btn btn-default get-back">取消</button>&nbsp;&nbsp;
+                <button type="submit" class="btn btn-success">保存</button>
+              </div>
+        </form>
+    </div>
+    
+    <script src="../lib/template.js"></script>
+    <script src="../lib/js/jquery-1.12.2.min.js"></script>
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <script src="../common/path_config.js"></script>
+    <script src="../common/alert.js"></script>
+    <script>
+        // 获取上页面传参，并生成到页面
+        var edit_data = window.location.search;
+        edit_data = JSON.parse(decodeURIComponent(edit_data.split("=")[1]));
+        
+        $("#input-box input[name=urlName]").val(edit_data.urlName);
+        $("#input-box input[name=url]").val(edit_data.url);
+        $("#input-box select[name=isopen]").val(edit_data.isopen);
+        $("#input-box input[name=remark]").val(edit_data.remark);
+        $("#input-box input[name=id]").val(edit_data.id);
+
+        $(document).ready(function(){
+            $("#add-form").submit(function(){
+                // 获取表单数据
+                var add_data = $("#add-form").serializeArray();
+                // 定义需要发送后台的数据
+                var send_data = {}
+                add_data.forEach(function(val,index){
+                    send_data[val.name]=val.value;
+                });
+                console.log(send_data);
+                $.ajax({
+                    type: 'POST',
+                    url: api.edit_url,
+                    dataType: "json",
+                    contentType: "text/plain",
+                    data:JSON.stringify(send_data) ,
+                    success: function(d){
+                        if(d.code==0){
+                            alert("编辑成功",function(){
+                                window.history.back();
+                            });
+                        }
+                    },
+                    complete: function (xhr, textStatus) {
+                    if(xhr.status == 403){
+                        alert("请登录后操作",function(){
+                            window.location.href = "../login/login.html";
+                        });
+                    }
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true,
+                });
+                return false;
+            });
+
+            $(document).on("click",".get-back",function(){
+                window.history.back(); //点击查看详情导航项、取消，返回上一页 
+            });
+        });
+    </script>
+</body>
+
+</html>

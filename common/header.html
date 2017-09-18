@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>blank</title>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <style>
+    	.header-nav{
+    		background-color: #24292C;
+    	}
+    	.header-nav ul.navbar-nav li a{
+    		height:70px;
+    		padding-top:30px;
+    		font-size:18px;
+    		padding-left:30px;
+    		padding-right:30px;
+    		color:#706f6e;
+    	}
+    	.header-nav ul.navbar-nav li a:link{
+    		background-color:transparent;
+    	}
+    	.header-nav ul.navbar-nav li a.add-hover:hover{
+    		background-color:transparent;
+    		color:#fff;
+    	}
+    	.header-nav ul.navbar-nav li a:visited{
+    		background-color:transparent;
+    	}
+    	.header-nav ul.navbar-nav li a:active{
+    		background-color:transparent;
+    		
+    	}
+    	.header-nav ul.navbar-nav li a.active{
+    		color:#fff;
+    	}
+
+    </style>
+</head>
+
+<body>
+    <div class="container-fulid header-nav" >
+    	<div class="container" >
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-9" style="float:left">
+                  <ul class="nav navbar-nav">
+                       <li><a href="javascript:;" class="add-hover" id="manage_list" >管理表</a></li>
+                  </ul>
+            </div>
+			<div class="collapse navbar-collapse" id="" style="float:right">
+		          <ul class="nav navbar-nav">
+                        <li><a href="javascript:;" id="login"><span class="glyphicon glyphicon-user"></span> <span id="user-ID">admin3</span></a></li>
+		          </ul>
+	        </div>
+        </div>
+    </div>
+    <script src="../lib/template.js"></script>
+    <script src="../lib/js/jquery-1.12.2.min.js"></script>
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <script>
+    	$(document).ready(function(){
+			var user_id = JSON.stringify(localStorage.getItem("manageURL_OA")).userName;
+			$("#user-ID").val(user_id);
+            $("#manage_list").on("click",function(){
+                // 点击时，在父窗口打开
+                window.parent.location.href = "../manage_list/manage_list.html";
+            })
+		});
+    </script>
+</body>
+
+</html>

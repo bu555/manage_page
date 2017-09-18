@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>管理列表-查看详情</title>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <style>
+        body{
+            background-color: #EDEDEF;
+        }
+        .table {
+            border:1px solid #ccc;
+            width:100%;
+        }
+        .table td.center{
+            text-align: center;
+        }
+        .table td.left{
+            padding-left:5px;
+        }
+        .table td.center.control{
+            width:150px;
+        }
+        table.table tr th{
+            text-align: center;
+            border:1px solid #ccc !important;
+            background:#F2F2F2;
+            padding-top:5px;
+            padding-bottom:5px;
+        }
+        table.table tr td{
+            border:1px solid #ccc;
+            padding-top:5px;
+            padding-bottom:5px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <iframe src="../common/header.html" width="100%" height="70" frameborder="0" scrolling="no"></iframe>
+    <!-- 页面导航 -->
+    <div class="container" style="background:#fff;margin-top:2px;margin-bottom:5px" >
+        <p class="text-primary" style="padding-top:10px">
+            <!-- <a href="../index.html" >首页</a> &gt; -->
+            <a href="./manage_list.html" >管理表</a> &gt;
+            <a href="javascript:;" >查看详情</a>
+        </p>
+        </p>
+    </div>
+    <!-- 页面内容 -->
+    <div class="container" style="background:#fff;padding:10px">
+        <a href="javascript:;" class="btn btn-default btn-xs pull-left get-back" style="padding:5px 10px;margin-bottom:5px"><span class="glyphicon glyphicon-chevron-left" style="font-size:12px;"></span>返回</a>
+        <a href="javascript:;" class="btn btn-success btn-xs pull-right" style="padding:5px 10px;margin-bottom:5px" id="add-url-btn"><span class="glyphicon glyphicon-plus" style="font-size:12px;"></span> 添加URL</a>
+        <!-- 显示列表 -->
+        <table class="table" >
+            <tr>
+                <th>序号</th>
+                <th>系统</th>
+                <th>版本号</th>
+                <th>URL名称</th>
+                <th>URL</th>
+                <th>是否启用</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>              
+           
+   
+        </table>
+
+    </div>
+    
+    <script src="../lib/template.js"></script>
+    <script src="../lib/js/jquery-1.12.2.min.js"></script>
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <script src="../common/path_config.js"></script>
+    <script src="../common/alert.js"></script>
+    <script type="text/template" id="detailed-data">
+        {{each res as val index}}
+        <tr>
+            <td class="center">{{val.index}}</td>
+            <td class="center operaSys">{{val.operaSys}}</td>
+            <td class="center version">{{val.version}}</td>                
+            <td class="left urlName">{{val.urlName}}</td>                
+            <td class="left url">{{val.url}}</td>                
+            <td class="center">{{if val.isopen=="1"}}是{{else}}否{{/if}}</td>                
+            <td class="center">{{val.remark}}</td>
+            <td style="display:none" id="del-id">{{val.id}}</td>
+            <td class="center control">
+                <a href="javascript:;" class="btn btn-primary btn-xs edit-btn" style="padding:0 10px;">编辑</a>
+                <a href="./manage_list_detailed.html" class="btn btn-danger btn-xs del-url-btn" style="padding:0 10px;margin-left:10px">删除</a>    
+            </td>
+        </tr>
+        {{/each}}  
+    </script>
+    <script>
+        $(document).ready(function(){
+            // 处理前页面传来的参数
+            var info = window.location.search.split("=");
+            var operaSys = info[0].slice(1);
+            var version = info[1];
+            $.ajax({
+                type: 'POST',
+                url: api.detailed,
+                dataType: "json",
+                contentType: "text/plain",
+                data:  JSON.stringify({version: version,operaSys:operaSys}),
+                success: function(d){
+                    console.log(d);
+                    // 添加一个索引
+                    var index = 0;
+                    for(var i in d.data){
+                        d.data[i]["index"] = ++index;
+                    }
+                    // 模板引擎渲染
+                    var htmlStr = template("detailed-data",{res:d.data});
+                    $(".table").append(htmlStr);
+                },
+                complete: function (xhr, textStatus) {
+                    console.log(xhr.status+"zzzzzzzzzzzzz")
+                    if(xhr.status == 403){
+                        window.location.href = "../login/login.html";
+                    }
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                crossDomain: true,
+            });
+            // 点击编辑按钮，获取相关数据，跳转并传参数
+            $(".table").on("click",".edit-btn",function(){
+                var tds = $(this).parent().parent().children();
+                var obj={
+                    id:tds[7].innerHTML,
+                    urlName: tds[3].innerHTML,
+                    url: tds[4].innerHTML,
+                    isopen: tds[5].innerHTML=="是"? 1:0 ,
+                    remark: tds[6].innerHTML
+                }
+                var edit_data=JSON.stringify(obj);
+                window.location.href="./manage_list_edit.html?edit_data="+edit_data;
+                return false;
+            });
+            $("#add-url-btn").on("click",function(){
+                window.location.href="./manage_list_add-url.html?"+operaSys+"="+version;
+            });
+            // 点击删除按钮，删除所对应的url
+            $(".table").on("click",".del-url-btn",function(){
+                var del_id = $(this).parent().parent().children("#del-id").html();
+                console.log(del_id);
+                var isDel = confirm("确定删除吗？");
+                if(isDel){
+                    $.ajax({
+                        type:"POST",
+                        url:api.del_url,
+                        dataType: "json",
+                        contentType: "application/json",
+                        data:  JSON.stringify({id:del_id}),
+                        success:function(d){
+                            if(d.code==0){
+                                alert("删除成功",function(){
+                                    window.location.reload();
+                                });
+                            }
+                        },
+                        complete: function (xhr, textStatus) {
+                            console.log(xhr.status+"zzz")
+                            if(xhr.status == 403){
+                                alert("请登录后操作",function(){
+                                    window.location.href = "../login/login.html";
+                                });
+                            }
+                        },
+                        xhrFields: {
+                            withCredentials: true
+                        },
+                        crossDomain: true 
+                    });
+                }
+                return false;
+            });
+
+            $(document).on("click",".get-back",function(){
+                window.history.back();
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>管理列表</title>
+    <link rel="stylesheet" href="../lib/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #EDEDEF;
+        }
+
+        .table {
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        table.table tr th {
+            text-align: center;
+            border: 1px solid #ccc !important;
+            background: #F2F2F2;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        table.table tr td {
+            border: 1px solid #ccc;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <iframe src="../common/header.html" width="100%" height="70" frameborder="0" scrolling="no"></iframe>
+    <!-- 页面导航 -->
+    <div class="container" style="background:#fff;margin-top:2px;margin-bottom:5px">
+        <p class="text-primary" style="padding-top:10px">
+            <!-- <a href="../index.html" >首页</a> &gt; -->
+            <a href="./manage_list.html">管理表</a>
+        </p>
+        </p>
+    </div>
+    <!-- 页面内容 -->
+    <div class="container" style="background:#fff;padding:10px">
+        <div class="btn-group" style="margin-bottom:6px;margin-top:-4px">
+            <a class="btn dropdown-toggle btn-success" href="./manage_list_add.html">
+                <span class="glyphicon glyphicon-plus" style="font-size:12px;font-weight:700"></span>&nbsp;新建
+            </a>
+        </div>
+        <!-- 显示列表 -->
+        <table class="table">
+            <tr>
+                <th style="width:8%">序号</th>
+                <th>系统</th>
+                <th>版本号</th>
+                <th>操作</th>
+            </tr>
+
+        </table>
+    </div>
+
+    <script src="../common/path_config.js"></script>
+    <script src="../lib/template.js"></script>
+    <script src="../lib/js/jquery-1.12.2.min.js"></script>
+    <script src="../lib/js/bootstrap.min.js"></script>
+    <script src="../common/alert.js"></script>
+    <script type="text/template" id="init-data">
+        {{each res as val index}}
+        <tr>
+            <td style="width:10%">{{val.index}}</td>
+            <td style="width:30%">{{val.operaSys}}</td>
+            <td style="width:30%">{{val.version}}</td>
+            <td>
+                <a href="javascript:;" class="btn btn-primary btn-xs detailed-btn" style="padding:0 10px;">查看详情</a>
+                <a href="javascript:;" class="btn btn-primary btn-xs update-v-btn" style="padding:0 10px;margin-left:15px">版本号更新</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <script>
+        console.log(api.init);
+        $(document).ready(function () {
+            // 点击查看详情
+            $(".table").on("click", ".detailed-btn", function () {
+                var operaSys = $(this).parent().parent().children().eq(1).html();
+                var version = $(this).parent().parent().children().eq(2).html();
+                window.location.href = "./manage_list_detailed.html?" + operaSys + "=" + version;
+            });
+            // 点击更新版本号
+            $(".table").on("click", ".update-v-btn", function () {
+                var operaSys = $(this).parent().parent().children().eq(1).html();
+                var version = $(this).parent().parent().children().eq(2).html();
+                window.location.href = "./manage_list_update-version.html?" + operaSys + "=" + version;
+            });
+
+            // 请求初始页数据
+            $.ajax({
+                type: 'POST',
+                url: api.init,
+                success: function (d) {
+                    console.log(d);
+                    // 添加一个顺序索引作为序号
+                    var index = 0;
+                    for (var i in d.data) {
+                        d.data[i].index = ++index;
+                    }
+                    var htmlStr = template("init-data", { res: d.data, index: 0 });
+                    $(".table").append(htmlStr);
+                },
+                complete: function (xhr, textStatus) {
+                    console.log(xhr.status+"zzzzz")
+                    if(xhr.status == 403){
+                        alert("请登录后操作",function(){
+                            window.location.href = "../login/login.html";
+                        });
+                    }
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                crossDomain: true,
+            });
+
+        });
+    </script>
+</body>
+
+</html>
